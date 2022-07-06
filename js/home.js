@@ -93,7 +93,6 @@ function handleNextClick(e) {
   const page = Number.parseInt(ulPagination.dataset.page) || 1
   const totalPages = ulPagination.dataset.totalPages
   if (page >= totalPages) return
-
   handleFilterChange('_page', page + 1)
 }
 
@@ -122,10 +121,39 @@ function initUrl() {
   history.pushState({}, '', url)
 }
 
+// function debounceSearch(callback, wait) {
+//   let timeOutId
+
+//   return function () {
+//     if (timeOutId) clearTimeout(timeOutId)
+//     timeOutId = setTimeout(callback, wait)
+//   }
+// }
+
+function initSearch() {
+  const searchInput = document.querySelector('#search-input')
+  const debounceSearch = debounce(
+    (event) => handleFilterChange('title_like', event.target.value),
+    500
+  )
+  if (!searchInput) return
+  searchInput.addEventListener('input', debounceSearch)
+}
+
+const debounce = (func, delay) => {
+  let debounceTimer
+  return function () {
+    const context = this
+    const args = arguments
+    clearTimeout(debounceTimer)
+    debounceTimer = setTimeout(() => func.apply(context, args), delay)
+  }
+}
 ;(async () => {
   try {
     init()
     initUrl()
+    initSearch()
     const queryParams = new URLSearchParams(window.location.search)
 
     const { data, pagination } = await postApi.getAll(queryParams)
